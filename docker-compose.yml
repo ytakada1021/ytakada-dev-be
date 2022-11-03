@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  devel:
+    build: .
+    volumes:
+      - .:/work
+      - cargo-store:$HOME/.cargo
+      - target-store:/work/target
+
+volumes:
+  cargo-store:
+  target-store:
