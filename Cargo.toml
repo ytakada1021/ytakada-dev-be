@@ -1,4 +1,12 @@
-[workspace]
-members = [
-    "ytakada-dev-core",
-]
+[package]
+name = "ytakada-dev"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.66"
+chrono = { version = "0.4.22", features = ["serde"] }
+pulldown-cmark = "0.9.2"
+regex = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
