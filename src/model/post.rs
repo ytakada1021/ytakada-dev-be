@@ -1,4 +1,5 @@
 use anyhow::{Ok, Result};
+use async_trait::async_trait;
 use chrono::{DateTime, Local};
 use pulldown_cmark::{html, Options, Parser};
 use regex::Regex;
@@ -233,4 +234,11 @@ impl Tag {
     pub fn value(&self) -> &str {
         &self.0
     }
+}
+
+#[async_trait]
+pub trait PostRepository {
+    async fn find(id: PostId) -> Result<Option<Post>>;
+    async fn save(post: Post) -> Result<()>;
+    async fn delete(id: PostId) -> Result<()>;
 }
