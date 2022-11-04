@@ -6,6 +6,7 @@ use mongodb::{options::ClientOptions, Client};
 
 use crate::model::post::{Post, PostId, PostRepository};
 
+#[derive(Clone)]
 pub struct MongoPostRepository {
     db: Database,
 }

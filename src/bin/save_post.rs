@@ -1,8 +1,12 @@
-use std::fmt::Error;
+use lambda_http::{Error};
+
+use ytakada_dev::{driver::handler::save_post::handler};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    println!("Hello world.");
+    let service = lambda_http::service_fn(handler);
+
+    lambda_http::run(service).await?;
 
     Ok(())
 }
