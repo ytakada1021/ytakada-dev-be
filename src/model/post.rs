@@ -238,7 +238,7 @@ impl Tag {
 
 #[async_trait]
 pub trait PostRepository {
-    async fn find(id: PostId) -> Result<Option<Post>>;
-    async fn save(post: Post) -> Result<()>;
-    async fn delete(id: PostId) -> Result<()>;
+    async fn find(&self, id: &PostId) -> Result<Option<Post>>;
+    async fn save(&self, post: &Post) -> Result<()>;
+    async fn delete(&self, id: &PostId) -> Result<()>;
 }
