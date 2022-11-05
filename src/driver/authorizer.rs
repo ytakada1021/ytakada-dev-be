@@ -2,10 +2,10 @@ pub struct Authorizer {
     api_key: String,
 }
 
-#[non_exhaustive]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, thiserror::Error)]
 pub enum Error {
-    InvalidApiKey { message: String },
+    #[error("Invalid api key.")]
+    InvalidApiKey,
 }
 
 impl Authorizer {
@@ -19,9 +19,7 @@ impl Authorizer {
         if subject == &self.api_key {
             Ok(())
         } else {
-            Err(Error::InvalidApiKey {
-                message: "Invalid api key.".to_string(),
-            })
+            Err(Error::InvalidApiKey)
         }
     }
 }
