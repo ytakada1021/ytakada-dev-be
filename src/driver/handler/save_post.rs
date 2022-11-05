@@ -1,9 +1,19 @@
-use lambda_http::{Body, Error, Request, RequestExt, Response, http::StatusCode};
+use lambda_http::{http::StatusCode, Body, Error, Request, RequestExt, Response};
 
 use crate::driver::container::Container;
 
 pub async fn handler(req: Request) -> Result<Response<String>, Error> {
     let container = Container::new().await;
+
+    match req.headers().get("x-api-key") {
+        Some(subject) => {
+            container
+                .authorizer
+                .authorize(subject.to_str().unwrap())
+                .unwrap();
+        },
+        None => todo!()
+    }
 
     let post_id = req
         .path_parameters()
