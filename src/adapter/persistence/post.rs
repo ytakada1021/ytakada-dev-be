@@ -4,7 +4,7 @@ use mongodb::{bson::doc, options::UpdateOptions, Collection, Database};
 #[cfg(test)]
 use mongodb::{options::ClientOptions, Client};
 
-use crate::core::model::post::{Post, PostId, PostRepository};
+use crate::{core::model::post::{Post, PostId}, app::persistence::PostRepository};
 
 #[derive(Clone)]
 pub struct MongoPostRepository {

@@ -4,7 +4,7 @@ use mongodb::{options::ClientOptions, Client};
 
 use crate::{
     adapter::persistence::post::MongoPostRepository, app::save_post::SavePostService,
-    core::model::post::PostRepository,
+    app::persistence::PostRepository,
 };
 
 use super::authorizer::Authorizer;

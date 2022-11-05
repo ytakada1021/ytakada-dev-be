@@ -1,8 +1,10 @@
 use anyhow::{Ok, Result};
 
-use crate::core::model::post::{Post, PostId, PostRepository};
+use crate::core::model::post::{Post, PostId};
 #[cfg(test)]
 use crate::driver::container::Container;
+
+use super::persistence::PostRepository;
 
 pub struct SavePostService {
     pub repo: Box<dyn PostRepository + Sync + Send>,
