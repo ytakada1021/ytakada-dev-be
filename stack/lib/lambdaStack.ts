@@ -13,8 +13,13 @@ export class LambdaStack extends Stack {
                 functionName: 'savePostFunction',
                 runtime: Runtime.PROVIDED_AL2,
                 handler: 'handler',
-                code: Code.fromAsset(`${__dirname}/../target/debug/cdk/save-post`),
-                timeout: Duration.seconds(10)
+                code: Code.fromAsset(`${__dirname}/../../target/debug/deploy/save-post`),
+                timeout: Duration.seconds(10),
+                environment: {
+                    DB_URL: process.env.DB_URL as string,
+                    DB_NAME: process.env.DB_NAME as string,
+                    API_KEY: process.env.API_KEY as string,
+                }
             }
         )
 

@@ -1,5 +1,5 @@
 import { App } from '@aws-cdk/core';
-import { LambdaStack } from './lambdaStack';
+import { LambdaStack } from './lib/lambdaStack';
 
 export default class Stack {
     public lambdaStack: LambdaStack;
