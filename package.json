@@ -1,0 +1,14 @@
+{
+  "name": "ytakada-dev-stack",
+  "version": "1.0.0",
+  "dependencies": {
+    "@aws-cdk/aws-apigateway": "^1.180.0",
+    "@aws-cdk/aws-lambda": "^1.180.0",
+    "@aws-cdk/core": "^1.180.0",
+    "@types/node": "^18.11.9",
+    "aws-cdk": "^2.50.0",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.0",
+    "typescript": "^4.8.4"
+  }
+}

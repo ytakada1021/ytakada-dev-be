@@ -3,10 +3,27 @@ version: "3.9"
 services:
   devel:
     build: .
+    environment:
+      - LOCALSTACK_HOSTNAME=localstack
+      - AWS_REGION=ap-northeast-1
     volumes:
       - .:/work
-      - cargo-store:$HOME/.cargo
+      - cargo-store:/root/.cargo
       - target-store:/work/target
+  localstack:
+    environment:
+      - DEBUG=${DEBUG-}
+      - PERSISTENCE=${PERSISTENCE-}
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - RUST_BACKTRACE=1
+    image: localstack/localstack
+    ports:
+      - 127.0.0.1:4566:4566
+      - 127.0.0.1:4510-4559:4510-4559
+    volumes:
+      - localstack-store:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
   mongo:
     image: mongo
     restart: always
@@ -32,6 +49,7 @@ services:
 
 volumes:
   cargo-store:
+  localstack-store:
   mongo-config-store:
   mongo-db-store:
   target-store:
