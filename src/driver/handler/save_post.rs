@@ -1,4 +1,5 @@
 use lambda_http::{http::StatusCode, Body, Error, Request, RequestExt, Response};
+use serde::Serialize;
 
 use crate::driver::container::Container;
 
@@ -7,29 +8,32 @@ pub async fn handler(req: Request) -> Result<Response<String>, Error> {
 
     match req.headers().get("x-api-key") {
         Some(subject) => {
-            container
+            if container
                 .authorizer
                 .authorize(subject.to_str().unwrap())
-                .unwrap();
+                .is_err()
+            {
+                return Ok(response_403("Invalid api key."));
+            }
         },
-        None => todo!()
+        None => return Ok(response_403("Invalid api key.")),
     }
 
-    let post_id = req
-        .path_parameters()
-        .first("id")
-        .expect("Post id should be provided.")
-        .to_string();
+    let params = req.path_parameters();
+    let post_id = params.first("id").clone();
+
+    if post_id.is_none() {
+        return Ok(response_400("Post id must be provided."))
+    }
 
     let body = match req.body() {
-        Body::Text(text) => Ok(text),
-        _ => Err(()),
-    }
-    .unwrap();
+        Body::Text(text) => text,
+        _ => return Ok(response_400("Invalid request body.")),
+    };
 
     let post = &container
         .save_post_service
-        .execute(&post_id, body)
+        .execute(&post_id.unwrap(), body)
         .await
         .unwrap();
 
@@ -43,4 +47,33 @@ pub async fn handler(req: Request) -> Result<Response<String>, Error> {
         .expect("failed to render response");
 
     Ok(res)
+}
+
+fn response_400(msg: &str) -> Response<String> {
+    let body = ErrorResponseBody {
+        message: msg.to_string(),
+    };
+
+    Response::builder()
+        .status(StatusCode::BAD_REQUEST)
+        .header("Content-Type", "application/json")
+        .body(serde_json::to_string(&body).unwrap())
+        .expect("Failed to render response.")
+}
+
+fn response_403(msg: &str) -> Response<String> {
+    let body = ErrorResponseBody {
+        message: msg.to_string(),
+    };
+
+    Response::builder()
+        .status(StatusCode::FORBIDDEN)
+        .header("Content-Type", "application/json")
+        .body(serde_json::to_string(&body).unwrap())
+        .expect("Failed to render response.")
+}
+
+#[derive(Debug, Serialize)]
+struct ErrorResponseBody {
+    message: String,
 }
