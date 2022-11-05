@@ -1,5 +1,3 @@
-use anyhow::{Ok, Result};
-use async_trait::async_trait;
 use chrono::{DateTime, Local};
 use pulldown_cmark::{html, Options, Parser};
 use regex::Regex;
@@ -16,16 +14,18 @@ pub struct Post {
 }
 
 impl Post {
-    pub fn from_markdown(id: PostId, markdown: &str) -> Result<Self> {
-        let (frontmatter, body) = Self::partite_to_frontmatter_and_body(markdown).unwrap();
+    pub fn from_markdown(id: PostId, markdown: &str) -> Result<Self, Error> {
+        let (frontmatter, body) = Self::partite_to_frontmatter_and_body(markdown)?;
 
-        let frontmatter = Self::parse_frontmatter(frontmatter).unwrap();
-        let body = Self::convert_to_html(body).unwrap(); // convert to html
+        let frontmatter = Self::parse_frontmatter(frontmatter)
+            .map_err(|_| Error::InvalidMarkdown(markdown.to_string()))?;
+
+        let body = Self::convert_to_html(body);
 
         Ok(Self {
             id,
-            title: PostTitle::new(&frontmatter.title).unwrap(),
-            content: PostContent::new(body.as_str()).unwrap(),
+            title: PostTitle::new(&frontmatter.title)?,
+            content: PostContent::new(body.as_str())?,
             tags: frontmatter
                 .tags
                 .into_iter()
@@ -60,30 +60,34 @@ impl Post {
         &self.updated_at
     }
 
-    fn partite_to_frontmatter_and_body(markdown: &str) -> Result<(&str, &str)> {
+    fn partite_to_frontmatter_and_body(markdown: &str) -> Result<(&str, &str), Error> {
         let re = Regex::new(r"^([\s]*)---([\s\S]*)---([\s\S]*)$").unwrap();
 
-        let cap = re.captures_iter(markdown).nth(0).unwrap();
-        let frontmatter = cap.get(2).map(|mat| mat.as_str()).unwrap().trim();
-        let body = cap.get(3).map(|mat| mat.as_str()).unwrap().trim();
+        let err = Error::InvalidMarkdown(markdown.to_string());
+
+        let cap = re.captures_iter(markdown).nth(0).ok_or(err.clone())?;
+        let frontmatter = cap
+            .get(2)
+            .map(|mat| mat.as_str())
+            .ok_or(err.clone())?
+            .trim();
+        let body = cap.get(3).map(|mat| mat.as_str()).ok_or(err)?.trim();
 
         Ok((frontmatter, body))
     }
 
-    fn parse_frontmatter(frontmatter: &str) -> Result<FrontMatter> {
-        let frontmatter: FrontMatter = serde_yaml::from_str(frontmatter).unwrap();
-
-        Ok(frontmatter)
+    fn parse_frontmatter(frontmatter: &str) -> serde_yaml::Result<FrontMatter> {
+        serde_yaml::from_str(frontmatter)
     }
 
-    fn convert_to_html(markdown: &str) -> Result<String> {
+    fn convert_to_html(markdown: &str) -> String {
         let options = Options::empty();
         let parser = Parser::new_ext(markdown, options);
 
         let mut html_output = String::new();
         html::push_html(&mut html_output, parser);
 
-        Ok(html_output)
+        html_output
     }
 }
 
@@ -137,7 +141,7 @@ fn test_convert_to_html() {
     let markdown = "# Hello world";
 
     let expected = "<h1>Hello world</h1>\n";
-    let html = Post::convert_to_html(markdown).unwrap();
+    let html = Post::convert_to_html(markdown);
 
     assert_eq!(expected, html)
 }
@@ -164,13 +168,16 @@ tags:
 pub struct PostId(String);
 
 impl PostId {
-    pub fn new(value: &str) -> Result<Self> {
-        let len = value.len();
+    pub fn new(value: &str) -> Result<Self, Error> {
+        let len = value.chars().count();
 
         if len >= 1 && len <= 50 {
             Ok(Self(value.to_string()))
         } else {
-            todo!()
+            Err(Error::InvalidArgument(format!(
+                "Post id must be 1 to 50 characters. Found: {}.",
+                len
+            )))
         }
     }
 
@@ -183,13 +190,16 @@ impl PostId {
 pub struct PostTitle(String);
 
 impl PostTitle {
-    pub fn new(value: &str) -> Result<Self> {
-        let len = value.len();
+    pub fn new(value: &str) -> Result<Self, Error> {
+        let len = value.chars().count();
 
         if len >= 1 && len <= 200 {
             Ok(Self(value.to_string()))
         } else {
-            todo!()
+            Err(Error::InvalidArgument(format!(
+                "Post title must be 1 to 200 characters. Found: {}.",
+                len
+            )))
         }
     }
 
@@ -202,13 +212,16 @@ impl PostTitle {
 pub struct PostContent(String);
 
 impl PostContent {
-    pub fn new(value: &str) -> Result<Self> {
-        let len = value.len();
+    pub fn new(value: &str) -> Result<Self, Error> {
+        let len = value.chars().count();
 
         if len >= 1 && len <= 50000 {
             Ok(Self(value.to_string()))
         } else {
-            todo!()
+            Err(Error::InvalidArgument(format!(
+                "Post content must be 1 to 50000 characters. Found: {}.",
+                len
+            )))
         }
     }
 
@@ -221,13 +234,16 @@ impl PostContent {
 pub struct Tag(String);
 
 impl Tag {
-    pub fn new(value: &str) -> Result<Self> {
-        let len = value.len();
+    pub fn new(value: &str) -> Result<Self, Error> {
+        let len = value.chars().count();
 
         if len >= 1 && len <= 50 {
             Ok(Self(value.to_string()))
         } else {
-            todo!()
+            Err(Error::InvalidArgument(format!(
+                "Tag must be 1 to 50 characters. Found: {}.",
+                len
+            )))
         }
     }
 
@@ -236,9 +252,10 @@ impl Tag {
     }
 }
 
-#[async_trait]
-pub trait PostRepository {
-    async fn find(&self, id: &PostId) -> Result<Option<Post>>;
-    async fn save(&self, post: &Post) -> Result<()>;
-    async fn delete(&self, id: &PostId) -> Result<()>;
+#[derive(Debug, thiserror::Error, Clone)]
+pub enum Error {
+    #[error("{0}")]
+    InvalidArgument(String),
+    #[error("Invalid markdown provided. Found: \n{0}")]
+    InvalidMarkdown(String),
 }
