@@ -1,6 +1,6 @@
 use anyhow::{Ok, Result};
 
-use crate::model::post::{Post, PostId, PostRepository};
+use crate::core::model::post::{Post, PostId, PostRepository};
 #[cfg(test)]
 use crate::driver::container::Container;
 
