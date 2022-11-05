@@ -10,5 +10,10 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",
     "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "cdklocal:bootstrap": "cdklocal bootstrap",
+    "cdklocal:hotswap": "cdklocal deploy --require-approval never '*' --hotswap",
+    "cdklocal:deploy": "cdklocal deploy --require-approval never '*'"
   }
 }
