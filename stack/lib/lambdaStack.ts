@@ -45,17 +45,22 @@ export class LambdaStack extends Stack {
             }
         )
 
-        // const deletePostFunction = new Function(
-        //     this,
-        //     'deletePostFunction',
-        //     {
-        //         functionName: 'deletePostFunction',
-        //         runtime: Runtime.PROVIDED_AL2,
-        //         handler: 'handler',
-        //         code: Code.fromAsset(`${__dirname}/../../functions/delete-post/target/cdk/debug`),
-        //         timeout: Duration.seconds(10)
-        //     }
-        // )
+        const deletePostFunction = new Function(
+            this,
+            'deletePostFunction',
+            {
+                functionName: 'deletePostFunction',
+                runtime: Runtime.PROVIDED_AL2,
+                handler: 'handler',
+                code: Code.fromAsset(`${__dirname}/../../target/${target}/deploy/delete-post`),
+                timeout: Duration.seconds(10),
+                environment: {
+                    DB_URL: dbUrl,
+                    DB_NAME: dbName,
+                    API_KEY: apiKey,
+                }
+            }
+        )
 
         // Define rest api.
         const api = new RestApi(
@@ -70,6 +75,6 @@ export class LambdaStack extends Stack {
         const singlePost = posts.addResource('{id}');
         singlePost.addMethod("GET", new LambdaIntegration(getPostFunction));
         singlePost.addMethod("PUT", new LambdaIntegration(savePostFunction));
-        // singlePost.addMethod('DELETE', new LambdaIntegration(deletePostFunction))
+        singlePost.addMethod('DELETE', new LambdaIntegration(deletePostFunction))
     }
 }

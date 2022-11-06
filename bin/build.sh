@@ -34,6 +34,6 @@ readonly GET_POST_DIR=${BASE_DIR}/get-post
 readonly LIST_POST_DIR=${BASE_DIR}/list-post
 mkdir -p ${SAVE_POST_DIR} ${DELETE_POST_DIR} ${GET_POST_DIR} ${LIST_POST_DIR}
 cp ./target/${STAGE}/save_post ${SAVE_POST_DIR}/bootstrap
-# cp ./target/${STAGE}/delete_post ${DELETE_POST_DIR}/bootstrap
+cp ./target/${STAGE}/delete_post ${DELETE_POST_DIR}/bootstrap
 cp ./target/${STAGE}/get_post ${GET_POST_DIR}/bootstrap
-# cp ./target/${STAGE}/list_post ${LIST_POST_DIR}/bootstrap
+cp ./target/${STAGE}/list_post ${LIST_POST_DIR}/bootstrap

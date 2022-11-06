@@ -1,6 +1,7 @@
 use lambda_http::{Response, http::StatusCode};
 use serde::Serialize;
 
+pub mod delete_post;
 pub mod get_post;
 pub mod save_post;
 

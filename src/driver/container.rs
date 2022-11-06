@@ -1,17 +1,20 @@
 use std::env;
 
-use mongodb::{options::ClientOptions, Client};
+use mongodb::{options::ClientOptions, Client, Database};
 
 use crate::{
-    adapter::persistence::post::MongoPostRepository, app::save_post::SavePostService,
-    app::persistence::PostRepository,
+    adapter::persistence::post::MongoPostRepository, app::{persistence::PostRepository, service::{get_post::GetPostService, delete_post::DeletePostService}},
+    app::save_post::SavePostService,
 };
 
 use super::authorizer::Authorizer;
 
 pub struct Container {
+    pub db: Database,
     pub post_repository: Box<dyn PostRepository + Sync + Send>,
     pub save_post_service: SavePostService,
+    pub get_post_service: GetPostService,
+    pub delete_post_service: DeletePostService,
     pub authorizer: Authorizer,
 }
 
@@ -27,17 +30,28 @@ impl Container {
 
         let db = Client::with_options(options).unwrap().database(&db_name);
 
-        let post_repoisotry = MongoPostRepository::new(db).unwrap();
+        let post_repoisotry = MongoPostRepository::new(db.clone()).unwrap();
 
         let save_post_service = SavePostService {
+            repo: Box::new(post_repoisotry.clone()),
+        };
+
+        let get_post_service = GetPostService {
+            db: db.clone(),
+        };
+
+        let delete_post_service = DeletePostService {
             repo: Box::new(post_repoisotry.clone()),
         };
 
         let api_key = env::var("API_KEY").expect("API_KEY must be set as environment variable.");
 
         Self {
+            db,
             post_repository: Box::new(post_repoisotry),
             save_post_service,
+            get_post_service,
+            delete_post_service,
             authorizer: Authorizer::new(api_key.as_str()),
         }
     }

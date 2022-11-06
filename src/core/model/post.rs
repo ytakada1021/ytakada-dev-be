@@ -138,13 +138,13 @@ tags:
 
 #[test]
 fn test_convert_to_html() {
-    let markdown = "# Hello world\n---";
+    let markdown = "# Hello world";
 
     let expected = "<h1>Hello world</h1>\n";
     let html = Post::convert_to_html(markdown);
 
     println!("{}", html);
-    // assert_eq!(expected, html)
+    assert_eq!(expected, html)
 }
 
 #[test]
