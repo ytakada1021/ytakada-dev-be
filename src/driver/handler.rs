@@ -3,6 +3,7 @@ use serde::Serialize;
 
 pub mod delete_post;
 pub mod get_post;
+pub mod list_post;
 pub mod save_post;
 
 pub fn response_400(msg: &str) -> Response<String> {

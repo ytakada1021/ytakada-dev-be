@@ -3,7 +3,7 @@ use std::env;
 use mongodb::{options::ClientOptions, Client, Database};
 
 use crate::{
-    adapter::persistence::post::MongoPostRepository, app::{persistence::PostRepository, service::{get_post::GetPostService, delete_post::DeletePostService}},
+    adapter::persistence::post::MongoPostRepository, app::{persistence::PostRepository, service::{get_post::GetPostService, delete_post::DeletePostService, list_post::ListPostService}},
     app::save_post::SavePostService,
 };
 
@@ -15,6 +15,7 @@ pub struct Container {
     pub save_post_service: SavePostService,
     pub get_post_service: GetPostService,
     pub delete_post_service: DeletePostService,
+    pub list_post_service: ListPostService,
     pub authorizer: Authorizer,
 }
 
@@ -44,6 +45,10 @@ impl Container {
             repo: Box::new(post_repoisotry.clone()),
         };
 
+        let list_post_service = ListPostService {
+            db: db.clone(),
+        };
+
         let api_key = env::var("API_KEY").expect("API_KEY must be set as environment variable.");
 
         Self {
@@ -52,6 +57,7 @@ impl Container {
             save_post_service,
             get_post_service,
             delete_post_service,
+            list_post_service,
             authorizer: Authorizer::new(api_key.as_str()),
         }
     }

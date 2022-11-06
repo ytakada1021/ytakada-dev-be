@@ -1989,6 +1989,7 @@ dependencies = [
  "async-trait",
  "bson",
  "chrono",
+ "futures",
  "lambda_http",
  "mongodb",
  "pulldown-cmark",

@@ -11,6 +11,23 @@ export class LambdaStack extends Stack {
         const dbName = process.env.DB_NAME as string;
         const apiKey = process.env.API_KEY as string;
 
+        const listPostFunction = new Function(
+            this,
+            'listPostFunction',
+            {
+                functionName: 'listPostFunction',
+                runtime: Runtime.PROVIDED_AL2,
+                handler: 'handler',
+                code: Code.fromAsset(`${__dirname}/../../target/${target}/deploy/list-post`),
+                timeout: Duration.seconds(10),
+                environment: {
+                    DB_URL: dbUrl,
+                    DB_NAME: dbName,
+                    API_KEY: apiKey,
+                }
+            }
+        );
+
         const getPostFunction = new Function(
             this,
             'getPostFunction',
@@ -72,6 +89,7 @@ export class LambdaStack extends Stack {
         );
         // Define resource.
         const posts = api.root.addResource('posts');
+        posts.addMethod("GET", new LambdaIntegration(listPostFunction));
         const singlePost = posts.addResource('{id}');
         singlePost.addMethod("GET", new LambdaIntegration(getPostFunction));
         singlePost.addMethod("PUT", new LambdaIntegration(savePostFunction));
