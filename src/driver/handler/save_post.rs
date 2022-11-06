@@ -1,7 +1,8 @@
 use lambda_http::{http::StatusCode, Body, Error, Request, RequestExt, Response};
-use serde::Serialize;
 
 use crate::driver::container::Container;
+
+use super::{response_403, response_400};
 
 pub async fn handler(req: Request) -> Result<Response<String>, Error> {
     let container = Container::new().await;
@@ -47,33 +48,4 @@ pub async fn handler(req: Request) -> Result<Response<String>, Error> {
         .expect("failed to render response");
 
     Ok(res)
-}
-
-fn response_400(msg: &str) -> Response<String> {
-    let body = ErrorResponseBody {
-        message: msg.to_string(),
-    };
-
-    Response::builder()
-        .status(StatusCode::BAD_REQUEST)
-        .header("Content-Type", "application/json")
-        .body(serde_json::to_string(&body).unwrap())
-        .expect("Failed to render response.")
-}
-
-fn response_403(msg: &str) -> Response<String> {
-    let body = ErrorResponseBody {
-        message: msg.to_string(),
-    };
-
-    Response::builder()
-        .status(StatusCode::FORBIDDEN)
-        .header("Content-Type", "application/json")
-        .body(serde_json::to_string(&body).unwrap())
-        .expect("Failed to render response.")
-}
-
-#[derive(Debug, Serialize)]
-struct ErrorResponseBody {
-    message: String,
 }

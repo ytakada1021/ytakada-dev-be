@@ -30,14 +30,14 @@ done
 # Build source.
 ./bin/build.sh
 
+# Set env.
+export $(cat .env.local | grep -v "#" | xargs)
+export TARGET=debug
+
 # Bootstrap if required.
 if [ ${WITH_BOOTSTRAP} -eq 1 ]; then
   npm run cdklocal:bootstrap
 fi
-
-# Set env.
-export $(cat .env.local | grep -v "#" | xargs)
-export TARGET=debug
 
 # Deploy to localstack (as hotswap if required).
 case ${HOTSWAP} in

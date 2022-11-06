@@ -7,6 +7,26 @@ export class LambdaStack extends Stack {
         super(scope, id, props);
 
         const target = process.env.TARGET as string;
+        const dbUrl = process.env.DB_URL as string;
+        const dbName = process.env.DB_NAME as string;
+        const apiKey = process.env.API_KEY as string;
+
+        const getPostFunction = new Function(
+            this,
+            'getPostFunction',
+            {
+                functionName: 'getPostFunction',
+                runtime: Runtime.PROVIDED_AL2,
+                handler: 'handler',
+                code: Code.fromAsset(`${__dirname}/../../target/${target}/deploy/get-post`),
+                timeout: Duration.seconds(10),
+                environment: {
+                    DB_URL: dbUrl,
+                    DB_NAME: dbName,
+                    API_KEY: apiKey,
+                }
+            }
+        );
 
         const savePostFunction = new Function(
             this,
@@ -18,9 +38,9 @@ export class LambdaStack extends Stack {
                 code: Code.fromAsset(`${__dirname}/../../target/${target}/deploy/save-post`),
                 timeout: Duration.seconds(10),
                 environment: {
-                    DB_URL: process.env.DB_URL as string,
-                    DB_NAME: process.env.DB_NAME as string,
-                    API_KEY: process.env.API_KEY as string,
+                    DB_URL: dbUrl,
+                    DB_NAME: dbName,
+                    API_KEY: apiKey,
                 }
             }
         )
@@ -48,6 +68,7 @@ export class LambdaStack extends Stack {
         // Define resource.
         const posts = api.root.addResource('posts');
         const singlePost = posts.addResource('{id}');
+        singlePost.addMethod("GET", new LambdaIntegration(getPostFunction));
         singlePost.addMethod("PUT", new LambdaIntegration(savePostFunction));
         // singlePost.addMethod('DELETE', new LambdaIntegration(deletePostFunction))
     }
