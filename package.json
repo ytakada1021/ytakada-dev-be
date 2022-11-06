@@ -14,6 +14,9 @@
   "scripts": {
     "cdklocal:bootstrap": "cdklocal bootstrap",
     "cdklocal:hotswap": "cdklocal deploy --require-approval never '*' --hotswap",
-    "cdklocal:deploy": "cdklocal deploy --require-approval never '*'"
+    "cdklocal:deploy": "cdklocal deploy --require-approval never '*'",
+    "cdk:deploy": "export CDK_APPROVAL='never' || export CDK_APPROVAL='broadening'; cdk deploy --require-approval $CDK_APPROVAL '*'",
+    "cdk:hotswap": "export CDK_APPROVAL='never' || export CDK_APPROVAL='broadening'; cdk deploy --require-approval $CDK_APPROVAL '*' --hotswap",
+    "cdk:bootstrap": "cdk bootstrap aws://$(aws sts get-caller-identity | jq -r .Account)/$AWS_REGION"
   }
 }

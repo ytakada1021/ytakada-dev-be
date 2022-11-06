@@ -6,6 +6,8 @@ export class LambdaStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
+        const target = process.env.TARGET as string;
+
         const savePostFunction = new Function(
             this,
             'savePostFunction',
@@ -13,7 +15,7 @@ export class LambdaStack extends Stack {
                 functionName: 'savePostFunction',
                 runtime: Runtime.PROVIDED_AL2,
                 handler: 'handler',
-                code: Code.fromAsset(`${__dirname}/../../target/debug/deploy/save-post`),
+                code: Code.fromAsset(`${__dirname}/../../target/${target}/deploy/save-post`),
                 timeout: Duration.seconds(10),
                 environment: {
                     DB_URL: process.env.DB_URL as string,
